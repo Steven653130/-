@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宠物知识平台</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>多语种宠物知识聚合平台</h1>
+        <div style="display:flex; align-items:center; gap:10px; justify-content:center; flex-wrap:wrap;">
+            <span id="auth-user" style="font-size:13px; opacity:0.95;"></span>
+            <button id="login-btn" type="button">Google 登录</button>
+        </div>
+    </header>
+    <main>
+        <section id="search">
+            <input id="feed-search-input" type="text" placeholder="搜索宠物知识（如：犬瘟热、猫粮、驱虫）...">
+            <button id="feed-search-btn" type="button">搜索</button>
+        </section>
+        <section id="knowledge-feed">
+            <div class="feed-header">
+                <h2>宠物知识资讯</h2>
+                <div class="feed-actions">
+                    <label for="feed-lang">展示语言</label>
+                    <select id="feed-lang">
+                        <option value="zh" selected>中文</option>
+                        <option value="en">English</option>
+                        <option value="fr">Francais</option>
+                        <option value="es">Espanol</option>
+                        <option value="ar">Arabic</option>
+                        <option value="ru">Russian</option>
+                    </select>
+                    <button id="refresh-feed-btn" type="button">刷新资讯</button>
+                </div>
+            </div>
+            <div id="feed-status" class="feed-status">正在加载资讯...</div>
+            <div id="feed-list" class="feed-list"></div>
+        </section>
+        <section id="ai-ask">
+            <h2>AI 问答</h2>
+            <textarea id="question" placeholder="输入您的问题..."></textarea>
+            <button id="ask-btn">提问</button>
+            <div id="answer"></div>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>

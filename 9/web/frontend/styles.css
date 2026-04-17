@@ -1,0 +1,177 @@
+/* Material Design 3 inspired styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+header {
+    background-color: #6200ea;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+}
+
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+section {
+    margin-bottom: 2rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+button {
+    background-color: #6200ea;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #3700b3;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#answer {
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background: #fafafa;
+    white-space: pre-wrap;
+    line-height: 1.7;
+}
+
+#answer .answer-title {
+    font-weight: 700;
+    margin-top: 8px;
+    margin-bottom: 4px;
+}
+
+#answer .answer-title:first-child {
+    margin-top: 0;
+}
+
+#answer .answer-text {
+    margin-bottom: 8px;
+}
+
+#answer .citation-list {
+    margin: 0;
+    padding-left: 20px;
+}
+
+#answer .citation-list li {
+    margin: 6px 0;
+}
+
+#answer .citation-list a {
+    color: #0b57d0;
+    text-decoration: none;
+}
+
+#answer .citation-list a:hover {
+    text-decoration: underline;
+}
+
+.feed-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.feed-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.feed-actions select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #fff;
+}
+
+.feed-status {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    color: #444;
+    font-size: 14px;
+}
+
+.feed-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.feed-card {
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+.feed-card img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    background: #f0f0f0;
+}
+
+.feed-card-body {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.feed-card-title {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.4;
+}
+
+.feed-card-text {
+    margin: 0;
+    color: #555;
+    line-height: 1.6;
+}
+
+.feed-card-meta {
+    margin-top: auto;
+    font-size: 12px;
+    color: #777;
+}
+
+.feed-card-link {
+    color: #0b57d0;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.feed-card-link:hover {
+    text-decoration: underline;
+}
