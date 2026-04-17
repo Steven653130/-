@@ -11,8 +11,25 @@ except ImportError:
 ZHIPU_MODEL = os.getenv("ZHIPU_MODEL", "glm-4-flash")
 
 
-def _clean_text(text):
+def _strip_scrape_noise(text):
     s = (text or "").strip()
+    if s == "":
+        return ""
+    s = re.sub(r'^\s*Title\s*:\s*.*$', ' ', s, flags=re.I | re.M)
+    s = re.sub(r'^\s*URL Source\s*:\s*.*$', ' ', s, flags=re.I | re.M)
+    s = re.sub(r'^\s*Published Time\s*:\s*.*$', ' ', s, flags=re.I | re.M)
+    s = re.sub(r'^\s*Markdown Content\s*:\s*$', ' ', s, flags=re.I | re.M)
+    s = re.sub(r'!\[[^\]]*\]\([^\)]*\)', ' ', s)
+    s = re.sub(r'\[([^\]]*)\]\([^\)]*\)', r'\1', s)
+    s = re.sub(r'https?://\S+', ' ', s)
+    s = re.sub(r'^#{1,6}\s*', '', s, flags=re.M)
+    s = re.sub(r'\|[^\n]*\|', ' ', s)
+    s = re.sub(r'\s+', ' ', s)
+    return s.strip()
+
+
+def _clean_text(text):
+    s = _strip_scrape_noise(text)
     s = re.sub(r'\s+', ' ', s)
     s = re.sub(r'^(?:标题|题目|摘要|内容)\s*[:：]\s*', '', s)
     return s.strip()
@@ -86,7 +103,7 @@ def _extract_json_obj(content):
 
 
 def generate_zh_card(text):
-    source = (text or "").strip()
+    source = _strip_scrape_noise(text)
     if source == "":
         return {"title": "", "summary": ""}
     if not ZHIPU_API_KEY:

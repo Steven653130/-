@@ -11,8 +11,9 @@ ZHIPU_MODEL = os.getenv("ZHIPU_MODEL", "glm-4-flash")
 ZHIPU_TIMEOUT_SECONDS = int(os.getenv("ZHIPU_TIMEOUT_SECONDS", "60"))
 ZHIPU_MAX_RETRIES = int(os.getenv("ZHIPU_MAX_RETRIES", "4"))
 ZHIPU_RETRY_BASE_SECONDS = float(os.getenv("ZHIPU_RETRY_BASE_SECONDS", "2"))
-ZHIPU_MAX_INPUT_CHARS = int(os.getenv("ZHIPU_MAX_INPUT_CHARS", "1200"))
+ZHIPU_MAX_INPUT_CHARS = int(os.getenv("ZHIPU_MAX_INPUT_CHARS", "5000"))
 ZHIPU_CHUNK_CHARS = int(os.getenv("ZHIPU_CHUNK_CHARS", "320"))
+ZHIPU_TRANSLATION_MAX_TOKENS = int(os.getenv("ZHIPU_TRANSLATION_MAX_TOKENS", "1200"))
 ENABLE_REMOTE_TRANSLATION = (
     os.getenv("ENABLE_REMOTE_TRANSLATION", "1") == "1" and bool((ZHIPU_API_KEY or "").strip())
 )
@@ -55,6 +56,37 @@ def _extract_text_from_response(data):
             m = re.search(r'(?:^|\n)(?:Translation|译文|翻译)\s*[:：]\s*(.+)$', reasoning_content, re.I | re.S)
             if m:
                 return m.group(1).strip()
+
+            m = re.search(r'(?:^|\n)(?:This translates to|Translated as|Final translation)\s*[:：]\s*(.+)$', reasoning_content, re.I | re.S)
+            if m:
+                return m.group(1).strip().strip('"\'')
+
+            # Fallback: collect line-level translation snippets from reasoning.
+            lines = [ln.strip() for ln in reasoning_content.splitlines() if ln.strip()]
+            picked = []
+            for ln in lines:
+                m_line = re.search(r'(?:^|\s)(?:Translation|译文|翻译|This translates to|Translated as|Final translation)\s*[:：]\s*(.+)$', ln, re.I)
+                if not m_line:
+                    continue
+                frag = m_line.group(1).strip().strip('"\'')
+                if frag:
+                    picked.append(frag)
+            if picked:
+                return "\n".join(picked).strip()
+
+            # Last-resort fallback: pick the final quoted non-Chinese sentence-like fragment.
+            quoted = re.findall(r'["“](.+?)["”]', reasoning_content, re.S)
+            if quoted:
+                for frag in reversed(quoted):
+                    candidate = frag.strip()
+                    if not candidate:
+                        continue
+                    if re.search(r'[\u4e00-\u9fff]', candidate):
+                        continue
+                    if len(candidate) < 6:
+                        continue
+                    if re.search(r'[A-Za-z\u0400-\u04FF\u0600-\u06FF]', candidate):
+                        return candidate
 
         # Some models return content as blocks [{type,text}, ...]
         if isinstance(msg_content, list):
@@ -101,7 +133,7 @@ def _call_zhipu_translate(source_text, target_lang):
                 "model": ZHIPU_MODEL,
                 "temperature": 0.2,
                 "top_p": 0.7,
-                "max_tokens": 600,
+                "max_tokens": ZHIPU_TRANSLATION_MAX_TOKENS,
                 "messages": [
                     {"role": "system", "content": "You are a professional translator for pet knowledge content."},
                     {"role": "user", "content": prompt_prefix + working_text},

@@ -15,6 +15,18 @@ except ImportError:
 LANGS = ["en", "fr", "es", "ar", "ru"]
 
 
+def parse_id_list(value):
+    raw = (value or "").strip()
+    if raw == "":
+        return []
+    out = []
+    for part in raw.split(','):
+        item = part.strip()
+        if item.isdigit():
+            out.append(int(item))
+    return out
+
+
 def is_empty(value):
     return (value or "").strip() == ""
 
@@ -59,11 +71,13 @@ def main():
     parser.add_argument("--sleep-ms", type=int, default=300, help="Delay between translation calls")
     parser.add_argument("--refresh-zh", action="store_true", help="Regenerate zh title/summary even when already filled")
     parser.add_argument("--force-langs", action="store_true", help="Overwrite selected language fields even when already filled")
+    parser.add_argument("--ids", type=str, default="", help="Comma-separated article IDs to process")
     args = parser.parse_args()
 
     selected_langs = [x.strip() for x in (args.langs or "").split(",") if x.strip() in LANGS]
     if not selected_langs:
         selected_langs = LANGS[:]
+    selected_ids = parse_id_list(args.ids)
 
     conn = pymysql.connect(
         host=DB_HOST,
@@ -75,19 +89,30 @@ def main():
         cursorclass=pymysql.cursors.DictCursor,
     )
 
-    sql = (
-        "SELECT id, content_zh, llm_title_zh, llm_summary_zh, "
-        "llm_title_en, llm_title_fr, llm_title_es, llm_title_ar, llm_title_ru, "
-        "llm_summary_en, llm_summary_fr, llm_summary_es, llm_summary_ar, llm_summary_ru "
-        "FROM articles ORDER BY id ASC LIMIT %s OFFSET %s"
-    )
+    if selected_ids:
+        placeholders = ",".join(["%s"] * len(selected_ids))
+        sql = (
+            "SELECT id, content_zh, llm_title_zh, llm_summary_zh, "
+            "llm_title_en, llm_title_fr, llm_title_es, llm_title_ar, llm_title_ru, "
+            "llm_summary_en, llm_summary_fr, llm_summary_es, llm_summary_ar, llm_summary_ru "
+            f"FROM articles WHERE id IN ({placeholders}) ORDER BY id ASC"
+        )
+        sql_params = selected_ids
+    else:
+        sql = (
+            "SELECT id, content_zh, llm_title_zh, llm_summary_zh, "
+            "llm_title_en, llm_title_fr, llm_title_es, llm_title_ar, llm_title_ru, "
+            "llm_summary_en, llm_summary_fr, llm_summary_es, llm_summary_ar, llm_summary_ru "
+            "FROM articles ORDER BY id ASC LIMIT %s OFFSET %s"
+        )
+        sql_params = (args.limit, args.offset)
 
     checked = 0
     updated = 0
 
     try:
         with conn.cursor() as cur:
-            cur.execute(sql, (args.limit, args.offset))
+            cur.execute(sql, sql_params)
             rows = cur.fetchall()
 
             for row in rows:
